@@ -14,7 +14,7 @@ void Motor::begin() {
   speed_ = MOTOR_SPEED_DEFAULT;
   stop();
 
-  Serial.println(F("Motor: GPIO 已初始化（尚未接线，电机不会转）"));
+  Serial.println(F("Motor: GPIO 已初始化  IN4=D8"));
 }
 
 void Motor::setSpeed(int speed) {
@@ -94,4 +94,9 @@ void Motor::apply(const String& cmd) {
   else if (cmd == "right") right();
   else if (cmd == "uturn") uturn();
   else stop();
+
+  Serial.print(F("  IN3="));
+  Serial.print(digitalRead(PIN_IN3));
+  Serial.print(F(" IN4="));
+  Serial.println(digitalRead(PIN_IN4));
 }

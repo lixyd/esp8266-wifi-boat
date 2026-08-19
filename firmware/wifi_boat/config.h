@@ -27,12 +27,12 @@
  * D2               4       IN2   左电机方向
  * D6              12       ENB   右电机速度（PWM）
  * D7              13       IN3   右电机方向
- * D0              16       IN4   右电机方向
+ * D8              15       IN4   右电机方向
  *
  * 不用这些脚的原因：
  *   D3/GPIO0  烧录按键，启动模式相关
  *   D4/GPIO2  板载 LED，启动模式相关
- *   D8/GPIO15 启动时必须为低，不适合乱接
+ *   D0/GPIO16 NodeMCU 上经常拉不出高电平，反转会变成停止
  */
 
 #define PIN_ENA 14
@@ -40,7 +40,7 @@
 #define PIN_IN2 4
 #define PIN_ENB 12
 #define PIN_IN3 13
-#define PIN_IN4 16
+#define PIN_IN4 15
 
 // ESP8266 analogWrite 范围设成 0–1023。800 大约是 78% 油门，第四阶段可再调。
 #define MOTOR_PWM_MAX        1023
