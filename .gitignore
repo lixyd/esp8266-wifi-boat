@@ -1,0 +1,29 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Arduino / arduino-cli 编译产物
+build/
+*.elf
+*.bin
+*.hex
+*.map
+*.eep
+*.lss
+*.sym
+
+# Arduino IDE / VS Code 本地配置（不提交个人路径）
+.vscode/
+.idea/
+*.code-workspace
+
+# 以后如果用 PlatformIO
+.pio/
+.pioenvs/
+.piolibdeps/
+
+# 日志与临时文件
+*.log
+*.tmp
+.cache/
