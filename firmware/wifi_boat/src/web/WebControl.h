@@ -1,9 +1,7 @@
 /*
  * WebControl.h
- * 第二阶段：ESP8266 开热点 + 网页控制台。
- *
- * 按钮目前只在串口打印中文，不驱动电机 GPIO。
- * 以后第三阶段把 handleCommand() 接到 Motor 类即可。
+ * 热点 + 网页控制台。
+ * 第三阶段起：按钮会调用 Motor，但尚未接线。
  */
 
 #ifndef WIFI_BOAT_WEB_CONTROL_H
@@ -14,16 +12,18 @@
 #include <ESP8266WebServer.h>
 #include <DNSServer.h>
 #include "../../config.h"
+#include "../motor/Motor.h"
 
 class WebControl {
  public:
-  void begin();
+  void begin(Motor* motors);
   void loop();
 
  private:
   ESP8266WebServer server_;
   DNSServer dns_;
   IPAddress apIp_;
+  Motor* motors_ = nullptr;
 
   void handleRoot();
   void handleCommand();

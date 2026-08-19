@@ -1,7 +1,8 @@
 #include "WebControl.h"
 #include "page.html.h"
 
-void WebControl::begin() {
+void WebControl::begin(Motor* motors) {
+  motors_ = motors;
   apIp_ = IPAddress(192, 168, 4, 1);
 
   WiFi.mode(WIFI_AP);
@@ -10,8 +11,8 @@ void WebControl::begin() {
 
   Serial.println();
   Serial.println(F("================================"));
-  Serial.println(F("wifi_boat  第二阶段  网页控制"));
-  Serial.println(F("按钮只打印文字，不驱动电机"));
+  Serial.println(F("wifi_boat  第三阶段  Motor + 网页"));
+  Serial.println(F("GPIO 会动作，但还没接 L298N，桨不会转"));
   Serial.print(F("热点名称: "));
   Serial.println(WIFI_AP_SSID);
   Serial.print(F("热点密码: "));
@@ -50,6 +51,9 @@ void WebControl::handleCommand() {
   String cmd = server_.arg("c");
   cmd.toLowerCase();
   printCommand(cmd);
+  if (motors_) {
+    motors_->apply(cmd);
+  }
 
   String text = cmd;
   if (cmd == "forward") text = "前进";

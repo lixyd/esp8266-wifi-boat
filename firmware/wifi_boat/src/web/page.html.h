@@ -50,7 +50,7 @@ static const char CONTROL_PAGE[] PROGMEM = R"HTML(
 </head>
 <body>
   <h1>Wi-Fi 遥控船</h1>
-  <div class="sub">第二阶段 · 按钮只发指令，不转电机</div>
+  <div class="sub">第三阶段 · 指令已到电机程序，先别接线</div>
   <div class="grid">
     <button class="fwd" onclick="go('forward')">前进</button>
     <button class="left" onclick="go('left')">左转</button>

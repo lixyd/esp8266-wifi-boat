@@ -1,3 +1,4 @@
-第三阶段才会在这里放 `Motor.h` / `Motor.cpp`。
+第三阶段：`Motor.h` / `Motor.cpp`。
 
-本阶段故意留空，避免还没接线就去操作 L298N 的 GPIO。
+网页按钮会调用 `Motor::apply()` 改 GPIO。
+**现在不要接 L298N。** 接线表见 `config.h` 和 `docs/03-电机驱动.md`。

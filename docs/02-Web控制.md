@@ -14,7 +14,8 @@
 
 电脑上看结果：
 
-- Arduino IDE：**Tools → Serial Monitor**，波特率 **115200**
+- Arduino IDE 2：**查看 → 串口监视器**（不在「工具」里），波特率 **115200**
+  详见 `docs/IDE串口监视器.md`
 - 或终端：
 
 ```bash
