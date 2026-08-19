@@ -42,9 +42,12 @@
 #define PIN_IN3 13
 #define PIN_IN4 15
 
-// ESP8266 analogWrite 范围设成 0–1023。800 大约是 78% 油门，第四阶段可再调。
+// ESP8266 analogWrite 范围 0–1023。默认用慢速，网页可切慢/中/快。
 #define MOTOR_PWM_MAX        1023
 #define MOTOR_PWM_FREQ_HZ    1000
-#define MOTOR_SPEED_DEFAULT  800
+#define MOTOR_SPEED_SLOW     360
+#define MOTOR_SPEED_MID      520
+#define MOTOR_SPEED_FAST     700
+#define MOTOR_SPEED_DEFAULT  MOTOR_SPEED_SLOW
 
 #endif

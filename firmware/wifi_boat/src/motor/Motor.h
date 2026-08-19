@@ -1,9 +1,6 @@
 /*
  * Motor.h
- * 第三阶段：L298N 双路电机封装。
- *
- * 现在就会改 GPIO 电平，但板子还没接到 L298N，
- * 所以桨不会转。第四阶段按 config.h 接线后再测。
+ * L298N 双路电机。转向用更低 PWM，避免原地甩得太猛。
  */
 
 #ifndef WIFI_BOAT_MOTOR_H
@@ -16,6 +13,7 @@ class Motor {
  public:
   void begin();
   void setSpeed(int speed);
+  int speed() const { return speed_; }
   void forward();
   void backward();
   void left();
@@ -26,10 +24,12 @@ class Motor {
 
  private:
   int speed_ = MOTOR_SPEED_DEFAULT;
+  String lastMove_ = "stop";
 
-  // dir: 1 正转, -1 反转, 0 停
-  void driveLeft(int dir);
-  void driveRight(int dir);
+  // dir: 1 正转, -1 反转, 0 停；pwm 为这一侧油门
+  void driveLeft(int dir, int pwm);
+  void driveRight(int dir, int pwm);
+  int turnPwm() const;
 };
 
 #endif
