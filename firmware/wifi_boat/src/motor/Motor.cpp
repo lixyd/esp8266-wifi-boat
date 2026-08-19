@@ -14,46 +14,67 @@ void Motor::begin() {
   speed_ = MOTOR_SPEED_DEFAULT;
   stop();
 
-  Serial.println(F("Motor: 直行跟慢中快，转弯内50外80"));
+  Serial.println(F("Motor: 快=拉满高电平  转弯映射到能转的区间"));
 }
 
 void Motor::setSpeed(int speed) {
   if (speed < 0) speed = 0;
-  if (speed > MOTOR_PWM_MAX) speed = MOTOR_PWM_MAX;
+  if (speed > 100) speed = 100;
   speed_ = speed;
   Serial.print(F("Motor: 直行速度 "));
   Serial.println(speed_);
 }
 
+int Motor::hwPwm(int pct) const {
+  if (pct <= 0) return 0;
+  if (pct >= 100) return MOTOR_PWM_MAX;
+  if (pct < 50) pct = 50;
+  return MOTOR_HW_MIN_SPIN + (MOTOR_PWM_MAX - MOTOR_HW_MIN_SPIN) * (pct - 50) / 50;
+}
+
+void Motor::writeEnable(uint8_t pin, int hw) {
+  if (hw <= 0) {
+    analogWrite(pin, 0);
+    digitalWrite(pin, LOW);
+  } else if (hw >= MOTOR_PWM_MAX) {
+    analogWrite(pin, 0);
+    digitalWrite(pin, HIGH);
+  } else {
+    analogWrite(pin, hw);
+  }
+}
+
 void Motor::driveLeft(int dir, int pwm) {
+  const int hw = hwPwm(pwm);
   if (dir > 0) {
     digitalWrite(PIN_IN1, HIGH);
     digitalWrite(PIN_IN2, LOW);
-    analogWrite(PIN_ENA, pwm);
+    writeEnable(PIN_ENA, hw);
   } else if (dir < 0) {
     digitalWrite(PIN_IN1, LOW);
     digitalWrite(PIN_IN2, HIGH);
-    analogWrite(PIN_ENA, pwm);
+    writeEnable(PIN_ENA, hw);
   } else {
     digitalWrite(PIN_IN1, LOW);
     digitalWrite(PIN_IN2, LOW);
-    analogWrite(PIN_ENA, 0);
+    writeEnable(PIN_ENA, 0);
   }
 }
 
 void Motor::driveRight(int dir, int pwm) {
+  const int hw = hwPwm(pwm);
   if (dir > 0) {
     digitalWrite(PIN_IN3, HIGH);
     digitalWrite(PIN_IN4, LOW);
-    analogWrite(PIN_ENB, pwm);
+    writeEnable(PIN_ENB, hw);
   } else if (dir < 0) {
     digitalWrite(PIN_IN3, LOW);
     digitalWrite(PIN_IN4, HIGH);
-    analogWrite(PIN_ENB, pwm);
+    writeEnable(PIN_ENB, hw);
   } else {
     digitalWrite(PIN_IN3, LOW);
     digitalWrite(PIN_IN4, LOW);
-    analogWrite(PIN_ENB, 0);
+    writeEnable(PIN_ENB, 0);
   }
 }
 
@@ -92,11 +113,6 @@ void Motor::stop() {
 void Motor::apply(const String& cmd) {
   if (cmd == "slow") {
     setSpeed(MOTOR_SPEED_SLOW);
-    if (lastMove_ != "stop") apply(lastMove_);
-    return;
-  }
-  if (cmd == "mid") {
-    setSpeed(MOTOR_SPEED_MID);
     if (lastMove_ != "stop") apply(lastMove_);
     return;
   }

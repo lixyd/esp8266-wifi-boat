@@ -1,6 +1,6 @@
 /*
  * Motor.h
- * 直行跟网页慢/中/快；转弯固定内侧 50、外侧 80，两轮正转。
+ * 直行两档：慢=巡航 70%，快=拉满。转弯内侧 50、外侧 80，两轮正转。
  */
 
 #ifndef WIFI_BOAT_MOTOR_H
@@ -28,6 +28,8 @@ class Motor {
 
   void driveLeft(int dir, int pwm);
   void driveRight(int dir, int pwm);
+  int hwPwm(int pct) const;
+  void writeEnable(uint8_t pin, int hw);
 };
 
 #endif

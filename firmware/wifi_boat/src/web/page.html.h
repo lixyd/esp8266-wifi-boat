@@ -43,7 +43,9 @@ static const char CONTROL_PAGE[] PROGMEM = R"HTML(
   .back { grid-column: 2; }
   .uturn { grid-column: 1 / span 3; background: #3d4f6f; }
   .stop { grid-column: 1 / span 3; background: #c62828; min-height: 84px; font-size: 22px; }
-  .spd { grid-column: span 1; min-height: 52px; font-size: 15px; background: #1a283c; }
+  .spd { min-height: 52px; font-size: 16px; background: #1a283c; }
+  .spd-slow { grid-column: 1 / span 2; }
+  .spd-fast { grid-column: 3; }
   .note { width: min(360px, 100%); color: #8aa0c4; font-size: 12px; line-height: 1.45; margin: 14px 0 0; }
   #status {
     margin-top: 16px; min-height: 24px; color: #9ad07a; font-size: 15px;
@@ -52,7 +54,7 @@ static const char CONTROL_PAGE[] PROGMEM = R"HTML(
 </head>
 <body>
   <h1>Wi-Fi 遥控船</h1>
-  <div class="sub">直行可拉满 · 转弯固定左50右80（右转对调）</div>
+  <div class="sub">慢=巡航 · 快=拉满 · 转弯左50右80</div>
   <div class="grid">
     <button class="fwd" onclick="go('forward')">前进</button>
     <button class="left" onclick="go('left')">左转</button>
@@ -60,12 +62,11 @@ static const char CONTROL_PAGE[] PROGMEM = R"HTML(
     <button class="back" onclick="go('backward')">后退</button>
     <button class="uturn" onclick="go('uturn')">掉头</button>
     <button class="stop" onclick="go('stop')">停止</button>
-    <button class="spd" onclick="go('slow')">慢</button>
-    <button class="spd" onclick="go('mid')">中</button>
-    <button class="spd" onclick="go('fast')">快</button>
+    <button class="spd spd-slow" onclick="go('slow')">慢</button>
+    <button class="spd spd-fast" onclick="go('fast')">快</button>
   </div>
-  <div class="note">慢速大约 55%，再低会只蜂鸣不转。点「快」直行拉满。左转：左桨 50、右桨 80，都向前推，弧线比较大。</div>
-  <div id="status">已连接 · 中速</div>
+  <div class="note">两档和市面玩具船一样：慢约 70% 巡航，快 100% 拉满。转弯不跟档位走，左转左桨 50、右桨 80，都向前，弧线比较大。</div>
+  <div id="status">已连接 · 慢（巡航）</div>
 <script>
 async function go(cmd) {
   const el = document.getElementById('status');
@@ -78,6 +79,12 @@ async function go(cmd) {
     el.textContent = '发送失败，确认还连着 wifi-boat';
   }
 }
+setInterval(async () => {
+  try { await fetch('/api/ping'); }
+  catch (e) {
+    document.getElementById('status').textContent = '已断开，请重连 wifi-boat';
+  }
+}, 2500);
 </script>
 </body>
 </html>

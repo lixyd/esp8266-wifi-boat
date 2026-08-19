@@ -5,6 +5,8 @@ void WebControl::begin(Motor* motors) {
   motors_ = motors;
   apIp_ = IPAddress(192, 168, 4, 1);
 
+  WiFi.persistent(false);
+  WiFi.setSleepMode(WIFI_NONE_SLEEP);
   WiFi.mode(WIFI_AP);
   WiFi.softAPConfig(apIp_, apIp_, IPAddress(255, 255, 255, 0));
   const bool ok = WiFi.softAP(WIFI_AP_SSID, WIFI_AP_PASSWORD, WIFI_AP_CHANNEL, false, WIFI_AP_MAX_CONN);
@@ -28,6 +30,9 @@ void WebControl::begin(Motor* motors) {
 
   server_.on("/", HTTP_GET, [this]() { handleRoot(); });
   server_.on("/api/cmd", HTTP_GET, [this]() { handleCommand(); });
+  server_.on("/api/ping", HTTP_GET, [this]() {
+    server_.send(200, "text/plain", "pong");
+  });
   // iOS / Android 探测「需要登录的热点」时会访问这些地址
   server_.on("/hotspot-detect.html", HTTP_GET, [this]() { handleRoot(); });
   server_.on("/generate_204", HTTP_GET, [this]() { handleRoot(); });
@@ -41,6 +46,7 @@ void WebControl::begin(Motor* motors) {
 void WebControl::loop() {
   dns_.processNextRequest();
   server_.handleClient();
+  yield();
 }
 
 void WebControl::handleRoot() {
@@ -62,9 +68,8 @@ void WebControl::handleCommand() {
   else if (cmd == "right") text = "右转 左80 右50";
   else if (cmd == "uturn") text = "掉头 内50 外80";
   else if (cmd == "stop") text = "停止";
-  else if (cmd == "slow") text = "速度：慢";
-  else if (cmd == "mid") text = "速度：中";
-  else if (cmd == "fast") text = "速度：快";
+  else if (cmd == "slow") text = "速度：慢（巡航）";
+  else if (cmd == "fast") text = "速度：快（拉满）";
   else text = "未知指令: " + cmd;
 
   String json = "{\"ok\":true,\"cmd\":\"" + cmd + "\",\"text\":\"" + text + "\"}";
@@ -84,9 +89,8 @@ void WebControl::printCommand(const String& cmd) {
   else if (cmd == "right") Serial.println(F("右转  right"));
   else if (cmd == "uturn") Serial.println(F("掉头  uturn"));
   else if (cmd == "stop") Serial.println(F("停止  stop"));
-  else if (cmd == "slow") Serial.println(F("速度 慢"));
-  else if (cmd == "mid") Serial.println(F("速度 中"));
-  else if (cmd == "fast") Serial.println(F("速度 快"));
+  else if (cmd == "slow") Serial.println(F("速度 慢 巡航"));
+  else if (cmd == "fast") Serial.println(F("速度 快 拉满"));
   else {
     Serial.print(F("未知  "));
     Serial.println(cmd);
