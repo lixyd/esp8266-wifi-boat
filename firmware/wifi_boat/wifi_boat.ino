@@ -2,45 +2,45 @@
  * wifi_boat.ino
  * ESP8266 双电机 Wi-Fi 遥控船 · 主程序入口
  *
- * 当前阶段：第一阶段
- *   只验证开发板能编译、烧录、运行。
- *   不初始化电机 GPIO，不启动 Web Server。
+ * 当前阶段：第二阶段
+ *   开发板开 Wi-Fi 热点，手机浏览器打开控制页。
+ *   按钮只在串口打印文字，不初始化电机 GPIO。
  *
- * 板载 LED：
- *   NodeMCU V3 的 LED_BUILTIN 是 GPIO2（丝印 D4）。
- *   这颗灯是低电平点亮（写 LOW 灯亮，写 HIGH 灯灭）。
+ * 用法：
+ *   1. 手机连热点 wifi-boat，密码 12345678
+ *   2. 浏览器打开 http://192.168.4.1/
+ *   3. 点前进/后退/左转/右转/掉头/停止
+ *   4. 电脑串口监视器 115200 应出现 [CMD] 前进 等
  *
- * 成功标志：
- *   烧录完成后，开发板上的蓝灯大约每秒闪一次。
- *   串口监视器（115200）会反复打印 "Blink OK"。
+ * 板载蓝灯大约每秒闪一次，表示程序还在跑。
  */
 
 #include <Arduino.h>
 #include "config.h"
+#include "src/web/WebControl.h"
+
+WebControl web;
+unsigned long lastBlinkMs = 0;
+bool ledOn = false;
 
 void setup() {
-  // 打开串口，方便在电脑上看板子是否在跑
   Serial.begin(SERIAL_BAUD);
   delay(200);
 
   pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, HIGH);  // 先灭（低电平才亮）
 
-  Serial.println();
-  Serial.println(F("================================"));
-  Serial.println(F("wifi_boat  第一阶段  Blink 验证"));
-  Serial.println(F("板子: NodeMCU V3 (ESP8266)"));
-  Serial.println(F("本阶段不控制电机、不启动网页"));
-  Serial.println(F("================================"));
+  web.begin();
 }
 
 void loop() {
-  // 点亮板载 LED（低电平有效）
-  digitalWrite(LED_BUILTIN, LOW);
-  Serial.println(F("Blink OK  LED ON"));
-  delay(500);
+  web.loop();
 
-  // 熄灭板载 LED
-  digitalWrite(LED_BUILTIN, HIGH);
-  Serial.println(F("Blink OK  LED OFF"));
-  delay(500);
+  // 非阻塞闪灯。这里不能再用 delay()，否则网页会卡死。
+  const unsigned long now = millis();
+  if (now - lastBlinkMs >= 500) {
+    lastBlinkMs = now;
+    ledOn = !ledOn;
+    digitalWrite(LED_BUILTIN, ledOn ? LOW : HIGH);
+  }
 }

@@ -1,3 +1,5 @@
-第二阶段才会在这里放网页服务器代码和控制页面。
+第二阶段：热点 + 网页控制（按钮只打印文字）。
 
-本阶段只验证开发板能跑 Blink。
+- `WebControl.cpp`：SoftAP、DNS 强制门户、HTTP 服务
+- `page.html.h`：手机控制页
+- 指令入口：`GET /api/cmd?c=forward|backward|left|right|uturn|stop`
