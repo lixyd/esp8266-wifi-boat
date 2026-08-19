@@ -52,7 +52,7 @@ static const char CONTROL_PAGE[] PROGMEM = R"HTML(
 </head>
 <body>
   <h1>Wi-Fi 遥控船</h1>
-  <div class="sub">默认慢速 · 转向再减半</div>
+  <div class="sub">直行可拉满 · 转弯固定左50右80（右转对调）</div>
   <div class="grid">
     <button class="fwd" onclick="go('forward')">前进</button>
     <button class="left" onclick="go('left')">左转</button>
@@ -64,8 +64,8 @@ static const char CONTROL_PAGE[] PROGMEM = R"HTML(
     <button class="spd" onclick="go('mid')">中</button>
     <button class="spd" onclick="go('fast')">快</button>
   </div>
-  <div class="note">只有一台电机接在 OUT3/OUT4 时：前进和左转都是这一侧正转，后退和右转都是反转，看起来会像「每个键都在转」。要看出转向，需要第二台电机接到 OUT1/OUT2。</div>
-  <div id="status">已连接 · 慢速</div>
+  <div class="note">慢速大约 55%，再低会只蜂鸣不转。点「快」直行拉满。左转：左桨 50、右桨 80，都向前推，弧线比较大。</div>
+  <div id="status">已连接 · 中速</div>
 <script>
 async function go(cmd) {
   const el = document.getElementById('status');

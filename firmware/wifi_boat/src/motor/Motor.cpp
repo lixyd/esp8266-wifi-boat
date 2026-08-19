@@ -14,22 +14,15 @@ void Motor::begin() {
   speed_ = MOTOR_SPEED_DEFAULT;
   stop();
 
-  Serial.println(F("Motor: 默认慢速，转向再减半"));
+  Serial.println(F("Motor: 直行跟慢中快，转弯内50外80"));
 }
 
 void Motor::setSpeed(int speed) {
   if (speed < 0) speed = 0;
   if (speed > MOTOR_PWM_MAX) speed = MOTOR_PWM_MAX;
   speed_ = speed;
-  Serial.print(F("Motor: 速度 "));
+  Serial.print(F("Motor: 直行速度 "));
   Serial.println(speed_);
-}
-
-int Motor::turnPwm() const {
-  // 转向大约用直行的一半，船才转得过来、又不会原地疯转
-  int t = speed_ / 2;
-  if (t < 280) t = (speed_ < 280) ? speed_ : 280;
-  return t;
 }
 
 void Motor::driveLeft(int dir, int pwm) {
@@ -75,21 +68,20 @@ void Motor::backward() {
 }
 
 void Motor::left() {
-  const int t = turnPwm();
-  driveLeft(-1, t);
-  driveRight(1, t);
+  // 左慢右快，都正转，弧线左转
+  driveLeft(1, MOTOR_TURN_INNER);
+  driveRight(1, MOTOR_TURN_OUTER);
 }
 
 void Motor::right() {
-  const int t = turnPwm();
-  driveLeft(1, t);
-  driveRight(-1, t);
+  driveLeft(1, MOTOR_TURN_OUTER);
+  driveRight(1, MOTOR_TURN_INNER);
 }
 
 void Motor::uturn() {
-  const int t = turnPwm();
-  driveLeft(1, t);
-  driveRight(-1, t);
+  // 掉头仍限 50/80：内侧反转 50，外侧正转 80
+  driveLeft(-1, MOTOR_TURN_INNER);
+  driveRight(1, MOTOR_TURN_OUTER);
 }
 
 void Motor::stop() {
@@ -126,10 +118,12 @@ void Motor::apply(const String& cmd) {
     lastMove_ = cmd;
   }
 
-  Serial.print(F("  IN3="));
-  Serial.print(digitalRead(PIN_IN3));
-  Serial.print(F(" IN4="));
-  Serial.print(digitalRead(PIN_IN4));
-  Serial.print(F(" spd="));
-  Serial.println(speed_);
+  Serial.print(F("  Lpwm="));
+  Serial.print((cmd == "left") ? MOTOR_TURN_INNER :
+               (cmd == "right") ? MOTOR_TURN_OUTER :
+               (cmd == "uturn") ? MOTOR_TURN_INNER : speed_);
+  Serial.print(F(" Rpwm="));
+  Serial.println((cmd == "left") ? MOTOR_TURN_OUTER :
+                 (cmd == "right") ? MOTOR_TURN_INNER :
+                 (cmd == "uturn") ? MOTOR_TURN_OUTER : speed_);
 }

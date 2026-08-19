@@ -1,6 +1,6 @@
 /*
  * Motor.h
- * L298N 双路电机。转向用更低 PWM，避免原地甩得太猛。
+ * 直行跟网页慢/中/快；转弯固定内侧 50、外侧 80，两轮正转。
  */
 
 #ifndef WIFI_BOAT_MOTOR_H
@@ -26,10 +26,8 @@ class Motor {
   int speed_ = MOTOR_SPEED_DEFAULT;
   String lastMove_ = "stop";
 
-  // dir: 1 正转, -1 反转, 0 停；pwm 为这一侧油门
   void driveLeft(int dir, int pwm);
   void driveRight(int dir, int pwm);
-  int turnPwm() const;
 };
 
 #endif

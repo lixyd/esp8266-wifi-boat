@@ -58,9 +58,9 @@ void WebControl::handleCommand() {
   String text = cmd;
   if (cmd == "forward") text = "前进";
   else if (cmd == "backward") text = "后退";
-  else if (cmd == "left") text = "左转（慢转）";
-  else if (cmd == "right") text = "右转（慢转）";
-  else if (cmd == "uturn") text = "掉头（慢转）";
+  else if (cmd == "left") text = "左转 左50 右80";
+  else if (cmd == "right") text = "右转 左80 右50";
+  else if (cmd == "uturn") text = "掉头 内50 外80";
   else if (cmd == "stop") text = "停止";
   else if (cmd == "slow") text = "速度：慢";
   else if (cmd == "mid") text = "速度：中";

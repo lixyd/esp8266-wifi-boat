@@ -42,12 +42,16 @@
 #define PIN_IN3 13
 #define PIN_IN4 15
 
-// ESP8266 analogWrite 范围 0–1023。默认用慢速，网页可切慢/中/快。
-#define MOTOR_PWM_MAX        1023
-#define MOTOR_PWM_FREQ_HZ    1000
-#define MOTOR_SPEED_SLOW     360
-#define MOTOR_SPEED_MID      520
-#define MOTOR_SPEED_FAST     700
-#define MOTOR_SPEED_DEFAULT  MOTOR_SPEED_SLOW
+// PWM 按 0–100 百分比。低于约 50 时 L298N 常只蜂鸣不转。
+#define MOTOR_PWM_MAX        100
+#define MOTOR_PWM_FREQ_HZ    20000
+#define MOTOR_SPEED_SLOW     55
+#define MOTOR_SPEED_MID      75
+#define MOTOR_SPEED_FAST     100
+#define MOTOR_SPEED_DEFAULT  MOTOR_SPEED_MID
+
+// 转弯固定油门，与慢/中/快无关。左转：左 50、右 80；右转对调。两轮都正转，弧度大。
+#define MOTOR_TURN_INNER     50
+#define MOTOR_TURN_OUTER     80
 
 #endif
