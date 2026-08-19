@@ -1,6 +1,6 @@
 #!/bin/zsh
 # 第一阶段依赖下载：关 VPN 后运行。
-# 断点续传、失败换镜像、下完按大小/SHA256 校验。
+# 只走 ghproxy.net。断点续传，下完按大小/SHA256 校验。
 set -uo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -11,12 +11,6 @@ CURL="/usr/bin/curl"
 
 mkdir -p "$DEST"
 exec > >(tee -a "$LOG") 2>&1
-
-MIRRORS=(
-  "https://ghproxy.net/"
-  "https://gh.llkk.cc/"
-  ""
-)
 
 echo "================================"
 echo "ESP8266 遥控船 · 第一阶段自动下载"
@@ -145,10 +139,11 @@ download_one() {
     echo "发现未下完的文件 $(file_size "$path") 字节，从断点续传。"
   fi
 
-  local mirror url rc
-  for mirror in "${MIRRORS[@]}"; do
-    url="${mirror}${gh_url}"
-    echo "尝试: $url"
+  local url rc attempt
+  url="https://ghproxy.net/${gh_url}"
+  echo "地址: $url"
+  for attempt in 1 2 3; do
+    echo "第 ${attempt}/3 次（断点续传）"
     rc=0
     if [[ -x "$ARIA2C" ]]; then
       download_with_aria2 "$url" "$filename" "$expect_sha" || rc=$?
@@ -160,7 +155,8 @@ download_one() {
       ok_count=$((ok_count + 1))
       return 0
     fi
-    echo "这个镜像不行 (exit=$rc)，换下一个。"
+    echo "未完成 (exit=$rc)，3 秒后继续从断点拉。"
+    sleep 3
   done
 
   echo "失败: $name"
