@@ -42,15 +42,17 @@
 #define PIN_IN3 13
 #define PIN_IN4 15
 
-// 网页仍按 0–100。硬件 PWM 用 0–1023。
-// L298N 压降大，低于约 75% 常只蜂鸣不转，所以 50–100 会映射到 780–1023。
+// 网页 0–100，硬件 PWM 0–1023。电池有电后不再把慢速抬到接近满油。
 #define MOTOR_PWM_MAX        1023
 #define MOTOR_PWM_FREQ_HZ    1000
-// 玩具双桨船常见两档：巡航约 70%，高速 100%。
-#define MOTOR_SPEED_SLOW     70
+#define MOTOR_SPEED_CRAWL    1
+#define MOTOR_SPEED_SLOW     40
 #define MOTOR_SPEED_FAST     100
 #define MOTOR_SPEED_DEFAULT  MOTOR_SPEED_SLOW
-#define MOTOR_HW_MIN_SPIN    780
+
+// 特慢：满扭矩短脉冲，5ms / 500ms = 1/100 时间，L298N 才能真慢转。
+#define MOTOR_CRAWL_PERIOD_MS 500
+#define MOTOR_CRAWL_ON_MS     5
 
 #define MOTOR_TURN_INNER     50
 #define MOTOR_TURN_OUTER     80

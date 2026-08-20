@@ -43,9 +43,7 @@ static const char CONTROL_PAGE[] PROGMEM = R"HTML(
   .back { grid-column: 2; }
   .uturn { grid-column: 1 / span 3; background: #3d4f6f; }
   .stop { grid-column: 1 / span 3; background: #c62828; min-height: 84px; font-size: 22px; }
-  .spd { min-height: 52px; font-size: 16px; background: #1a283c; }
-  .spd-slow { grid-column: 1 / span 2; }
-  .spd-fast { grid-column: 3; }
+  .spd { min-height: 52px; font-size: 15px; background: #1a283c; }
   .note { width: min(360px, 100%); color: #8aa0c4; font-size: 12px; line-height: 1.45; margin: 14px 0 0; }
   #status {
     margin-top: 16px; min-height: 24px; color: #9ad07a; font-size: 15px;
@@ -54,7 +52,7 @@ static const char CONTROL_PAGE[] PROGMEM = R"HTML(
 </head>
 <body>
   <h1>Wi-Fi 遥控船</h1>
-  <div class="sub">慢=巡航 · 快=拉满 · 转弯左50右80</div>
+  <div class="sub">特慢≈1/100 · 慢=巡航 · 快=拉满</div>
   <div class="grid">
     <button class="fwd" onclick="go('forward')">前进</button>
     <button class="left" onclick="go('left')">左转</button>
@@ -62,11 +60,12 @@ static const char CONTROL_PAGE[] PROGMEM = R"HTML(
     <button class="back" onclick="go('backward')">后退</button>
     <button class="uturn" onclick="go('uturn')">掉头</button>
     <button class="stop" onclick="go('stop')">停止</button>
-    <button class="spd spd-slow" onclick="go('slow')">慢</button>
-    <button class="spd spd-fast" onclick="go('fast')">快</button>
+    <button class="spd" onclick="go('crawl')">特慢</button>
+    <button class="spd" onclick="go('slow')">慢</button>
+    <button class="spd" onclick="go('fast')">快</button>
   </div>
-  <div class="note">两档和市面玩具船一样：慢约 70% 巡航，快 100% 拉满。转弯不跟档位走，左转左桨 50、右桨 80，都向前，弧线比较大。</div>
-  <div id="status">已连接 · 慢（巡航）</div>
+  <div class="note">特慢用短脉冲，桨会一顿一顿地爬，这是 L298N 能做到接近 1/100 转速的办法。慢约 40%。快拉满。转弯按当前档的 50/80。</div>
+  <div id="status">已连接 · 慢</div>
 <script>
 async function go(cmd) {
   const el = document.getElementById('status');

@@ -33,6 +33,7 @@ void setup() {
 
 void loop() {
   web.loop();
+  motors.loop();
 
   const unsigned long now = millis();
   if (now - lastBlinkMs >= 500) {
