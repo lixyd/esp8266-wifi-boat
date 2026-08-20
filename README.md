@@ -1,5 +1,7 @@
 # ESP8266 双电机 Wi-Fi 遥控船
 
+给 Codex 看本项目：打开本目录新建对话，先读 [`AGENTS.md`](AGENTS.md) 和 [`docs/手册.html`](docs/手册.html)。
+
 **离线手册（采购 + 接线 + 程序）：** 用浏览器打开 [`docs/手册.html`](docs/手册.html)
 
 GitHub：https://github.com/lixyd/esp8266-wifi-boat
