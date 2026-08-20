@@ -108,7 +108,7 @@ page = r'''<!DOCTYPE html>
 <header>
   <h1>ESP8266 双电机 Wi-Fi 遥控船</h1>
   <p class="lede">本机手册 · 2026-08-20 · 代码与照片都在这个仓库里。双击本文件即可离线阅读。<br>
-  GitHub：<a href="https://github.com/lixyd/esp8266-wifi-boat">lixyd/esp8266-wifi-boat</a>（私有）</p>
+  GitHub：<a href="https://github.com/lixyd/esp8266-wifi-boat">lixyd/esp8266-wifi-boat</a>（公开）</p>
 </header>
 
 <section id="overview">

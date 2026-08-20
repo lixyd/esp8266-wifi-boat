@@ -2,7 +2,7 @@
 
 **离线手册（采购 + 接线 + 程序）：** 用浏览器打开 [`docs/手册.html`](docs/手册.html)
 
-GitHub（私有）：https://github.com/lixyd/esp8266-wifi-boat
+GitHub：https://github.com/lixyd/esp8266-wifi-boat
 
 手机连热点 **wifi-boat** / **12345678**，打开 http://192.168.4.1/
 
