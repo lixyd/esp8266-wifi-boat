@@ -68,9 +68,9 @@ void WebControl::handleCommand() {
   else if (cmd == "right") text = "右转 左80 右50";
   else if (cmd == "uturn") text = "掉头 内50 外80";
   else if (cmd == "stop") text = "停止";
-  else if (cmd == "crawl") text = "速度：特慢（约1/100）";
-  else if (cmd == "slow") text = "速度：慢（巡航）";
-  else if (cmd == "fast") text = "速度：快（拉满）";
+  else if (cmd == "crawl") text = "特慢 ≤10%";
+  else if (cmd == "slow") text = "慢 ≤40%";
+  else if (cmd == "fast") text = "快 90%";
   else text = "未知指令: " + cmd;
 
   String json = "{\"ok\":true,\"cmd\":\"" + cmd + "\",\"text\":\"" + text + "\"}";
@@ -90,9 +90,9 @@ void WebControl::printCommand(const String& cmd) {
   else if (cmd == "right") Serial.println(F("右转  right"));
   else if (cmd == "uturn") Serial.println(F("掉头  uturn"));
   else if (cmd == "stop") Serial.println(F("停止  stop"));
-  else if (cmd == "crawl") Serial.println(F("速度 特慢 1/100"));
-  else if (cmd == "slow") Serial.println(F("速度 慢 巡航"));
-  else if (cmd == "fast") Serial.println(F("速度 快 拉满"));
+  else if (cmd == "crawl") Serial.println(F("速度 特慢 10%"));
+  else if (cmd == "slow") Serial.println(F("速度 慢 40%"));
+  else if (cmd == "fast") Serial.println(F("速度 快 90%"));
   else {
     Serial.print(F("未知  "));
     Serial.println(cmd);

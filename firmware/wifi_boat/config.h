@@ -42,17 +42,13 @@
 #define PIN_IN3 13
 #define PIN_IN4 15
 
-// 网页 0–100，硬件 PWM 0–1023。电池有电后不再把慢速抬到接近满油。
+// 油门百分比上限：特慢 ≤10，慢 ≤40，快 ≥80。
 #define MOTOR_PWM_MAX        1023
 #define MOTOR_PWM_FREQ_HZ    1000
-#define MOTOR_SPEED_CRAWL    1
+#define MOTOR_SPEED_CRAWL    10
 #define MOTOR_SPEED_SLOW     40
-#define MOTOR_SPEED_FAST     100
+#define MOTOR_SPEED_FAST     90
 #define MOTOR_SPEED_DEFAULT  MOTOR_SPEED_SLOW
-
-// 特慢：满扭矩短脉冲，5ms / 500ms = 1/100 时间，L298N 才能真慢转。
-#define MOTOR_CRAWL_PERIOD_MS 500
-#define MOTOR_CRAWL_ON_MS     5
 
 #define MOTOR_TURN_INNER     50
 #define MOTOR_TURN_OUTER     80

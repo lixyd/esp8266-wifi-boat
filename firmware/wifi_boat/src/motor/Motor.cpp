@@ -12,22 +12,17 @@ void Motor::begin() {
   analogWriteFreq(MOTOR_PWM_FREQ_HZ);
 
   speed_ = MOTOR_SPEED_DEFAULT;
-  crawl_ = false;
   stop();
-  Serial.println(F("Motor: 特慢1/100脉冲  慢巡航  快拉满"));
+  Serial.println(F("Motor: 特慢10  慢40  快90"));
 }
 
-void Motor::loop() {
-  if (crawl_ && lastMove_ != "stop") {
-    refresh();
-  }
-}
+void Motor::loop() {}
 
 void Motor::setSpeed(int speed) {
   if (speed < 0) speed = 0;
   if (speed > 100) speed = 100;
   speed_ = speed;
-  Serial.print(F("Motor: 直行速度 "));
+  Serial.print(F("Motor: 档 "));
   Serial.println(speed_);
 }
 
@@ -88,35 +83,16 @@ void Motor::setMix(int leftDir, int leftPct, int rightDir, int rightPct) {
   rightDir_ = rightDir;
   leftPct_ = leftPct;
   rightPct_ = rightPct;
-  refresh();
+  driveLeft(leftDir_, leftPct_);
+  driveRight(rightDir_, rightPct_);
 }
 
-void Motor::refresh() {
-  if (lastMove_ == "stop") {
-    driveLeft(0, 0);
-    driveRight(0, 0);
-    return;
-  }
+int Motor::turnInner() const {
+  return speed_ * MOTOR_TURN_INNER / 100;
+}
 
-  bool pulseOn = true;
-  if (crawl_) {
-    pulseOn = (millis() % MOTOR_CRAWL_PERIOD_MS) < MOTOR_CRAWL_ON_MS;
-  }
-
-  if (!pulseOn) {
-    writeEnable(PIN_ENA, 0);
-    writeEnable(PIN_ENB, 0);
-    return;
-  }
-
-  // 特慢：脉冲里给能转的扭矩，用 5ms/500ms 把平均转速压到约 1/100
-  if (crawl_) {
-    driveLeft(leftDir_, leftPct_ < rightPct_ ? 80 : 100);
-    driveRight(rightDir_, rightPct_ < leftPct_ ? 80 : 100);
-  } else {
-    driveLeft(leftDir_, leftPct_);
-    driveRight(rightDir_, rightPct_);
-  }
+int Motor::turnOuter() const {
+  return speed_ * MOTOR_TURN_OUTER / 100;
 }
 
 void Motor::forward() {
@@ -128,21 +104,15 @@ void Motor::backward() {
 }
 
 void Motor::left() {
-  const int inner = crawl_ ? MOTOR_TURN_INNER : speed_ * MOTOR_TURN_INNER / 100;
-  const int outer = crawl_ ? MOTOR_TURN_OUTER : speed_ * MOTOR_TURN_OUTER / 100;
-  setMix(1, inner, 1, outer);
+  setMix(1, turnInner(), 1, turnOuter());
 }
 
 void Motor::right() {
-  const int inner = crawl_ ? MOTOR_TURN_INNER : speed_ * MOTOR_TURN_INNER / 100;
-  const int outer = crawl_ ? MOTOR_TURN_OUTER : speed_ * MOTOR_TURN_OUTER / 100;
-  setMix(1, outer, 1, inner);
+  setMix(1, turnOuter(), 1, turnInner());
 }
 
 void Motor::uturn() {
-  const int inner = crawl_ ? MOTOR_TURN_INNER : speed_ * MOTOR_TURN_INNER / 100;
-  const int outer = crawl_ ? MOTOR_TURN_OUTER : speed_ * MOTOR_TURN_OUTER / 100;
-  setMix(-1, inner, 1, outer);
+  setMix(-1, turnInner(), 1, turnOuter());
 }
 
 void Motor::stop() {
@@ -157,20 +127,16 @@ void Motor::stop() {
 
 void Motor::apply(const String& cmd) {
   if (cmd == "crawl") {
-    crawl_ = true;
-    speed_ = MOTOR_SPEED_CRAWL;
-    Serial.println(F("Motor: 特慢 1/100 脉冲"));
+    setSpeed(MOTOR_SPEED_CRAWL);
     if (lastMove_ != "stop") apply(lastMove_);
     return;
   }
   if (cmd == "slow") {
-    crawl_ = false;
     setSpeed(MOTOR_SPEED_SLOW);
     if (lastMove_ != "stop") apply(lastMove_);
     return;
   }
   if (cmd == "fast") {
-    crawl_ = false;
     setSpeed(MOTOR_SPEED_FAST);
     if (lastMove_ != "stop") apply(lastMove_);
     return;
@@ -197,8 +163,7 @@ void Motor::apply(const String& cmd) {
 
   Serial.print(F("  L="));
   Serial.print(leftPct_);
-  Serial.print(F(" R="));
+  Serial.print(F("% R="));
   Serial.print(rightPct_);
-  Serial.print(F(" crawl="));
-  Serial.println(crawl_ ? 1 : 0);
+  Serial.println('%');
 }

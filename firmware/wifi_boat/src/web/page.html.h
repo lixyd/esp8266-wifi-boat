@@ -52,7 +52,7 @@ static const char CONTROL_PAGE[] PROGMEM = R"HTML(
 </head>
 <body>
   <h1>Wi-Fi 遥控船</h1>
-  <div class="sub">特慢≈1/100 · 慢=巡航 · 快=拉满</div>
+  <div class="sub">特慢≤10% · 慢≤40% · 快90%</div>
   <div class="grid">
     <button class="fwd" onclick="go('forward')">前进</button>
     <button class="left" onclick="go('left')">左转</button>
@@ -64,7 +64,7 @@ static const char CONTROL_PAGE[] PROGMEM = R"HTML(
     <button class="spd" onclick="go('slow')">慢</button>
     <button class="spd" onclick="go('fast')">快</button>
   </div>
-  <div class="note">特慢用短脉冲，桨会一顿一顿地爬，这是 L298N 能做到接近 1/100 转速的办法。慢约 40%。快拉满。转弯按当前档的 50/80。</div>
+  <div class="note">油门硬限制：特慢最高 10%，慢最高 40%，快 90%。转弯是当前档的 50/80，不会超过该档上限。10% 时 L298N 可能只叫不转，那是驱动板下限。</div>
   <div id="status">已连接 · 慢</div>
 <script>
 async function go(cmd) {
