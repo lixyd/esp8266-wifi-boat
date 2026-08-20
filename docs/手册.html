@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ESP8266 Wi-Fi 遥控船 · 手册</title>
+<style>
+  :root {
+    --bg: #f4efe6;
+    --paper: #fffdf8;
+    --ink: #1c1915;
+    --muted: #5c564c;
+    --line: #d9d0c2;
+    --accent: #0f4c5c;
+    --warn: #8a2f12;
+    --ok: #1f5c3a;
+    --code-bg: #1b2428;
+    --code-fg: #e7eef0;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font: 16px/1.55 "Songti SC", "Source Han Serif SC", "Noto Serif SC", Georgia, serif;
+    color: var(--ink);
+    background: var(--bg);
+  }
+  .wrap { display: grid; grid-template-columns: 240px minmax(0, 920px); gap: 0; }
+  nav {
+    position: sticky; top: 0; height: 100vh; overflow: auto;
+    padding: 28px 18px; border-right: 1px solid var(--line); background: #efe8dc;
+  }
+  nav h2 { font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 0 0 12px; }
+  nav a { display: block; color: var(--ink); text-decoration: none; padding: 5px 0; font-size: 14px; }
+  nav a:hover { color: var(--accent); }
+  main { padding: 36px 40px 80px; background: var(--paper); min-height: 100vh; }
+  header h1 { font-size: 34px; line-height: 1.15; margin: 0 0 8px; }
+  .lede { color: var(--muted); margin: 0 0 28px; }
+  h2 { margin: 40px 0 12px; font-size: 24px; border-bottom: 2px solid var(--ink); padding-bottom: 6px; }
+  h3 { margin: 26px 0 10px; font-size: 18px; color: var(--accent); }
+  table { width: 100%; border-collapse: collapse; font-size: 14.5px; margin: 10px 0 18px; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; vertical-align: top; }
+  th { background: #f3ebe0; }
+  code, kbd { font-family: ui-monospace, Menlo, monospace; font-size: 13px; background: #efe6d8; padding: 1px 5px; }
+  pre {
+    background: var(--code-bg); color: var(--code-fg); padding: 14px 16px;
+    overflow: auto; font: 12.5px/1.45 ui-monospace, Menlo, monospace;
+    border-radius: 6px;
+  }
+  .note, .danger { padding: 10px 14px; border-left: 4px solid var(--ok); background: #eef6f0; margin: 12px 0 18px; }
+  .danger { border-color: var(--warn); background: #f8eee8; }
+  figure { margin: 12px 0 22px; }
+  figure img { max-width: 100%; height: auto; border: 1px solid var(--line); background: #fff; }
+  figcaption { font-size: 13px; color: var(--muted); margin-top: 6px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 900px) {
+    .wrap { grid-template-columns: 1fr; }
+    nav { position: relative; height: auto; }
+    main { padding: 24px 16px 60px; }
+    .grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav>
+  <h2>目录</h2>
+  <a href="#overview">1. 这是什么</a>
+  <a href="#buy">2. 已买件</a>
+  <a href="#use">3. 怎么开船</a>
+  <a href="#wire">4. 接线</a>
+  <a href="#speed">5. 油门</a>
+  <a href="#flash">6. 编译烧录</a>
+  <a href="#cam">7. 摄像头</a>
+  <a href="#code">8. 程序</a>
+  <a href="#pits">9. 踩过的坑</a>
+</nav>
+<main>
+<header>
+  <h1>ESP8266 双电机 Wi-Fi 遥控船</h1>
+  <p class="lede">本机手册 · 2026-08-20 · 代码与照片都在这个仓库里。双击本文件即可离线阅读。<br>
+  GitHub：<a href="https://github.com/lixyd/esp8266-wifi-boat">lixyd/esp8266-wifi-boat</a>（私有）</p>
+</header>
+
+<section id="overview">
+<h2>1. 这是什么</h2>
+<p>NodeMCU V3（ESP8266）开热点，手机网页遥控两只减速电机。驱动是 L298N（HW-095）。现在双电机已接，网页能调速，电池可以同时给驱动和板子供电。</p>
+<table>
+  <tr><th>热点</th><td><code>wifi-boat</code></td></tr>
+  <tr><th>密码</th><td><code>12345678</code></td></tr>
+  <tr><th>控制页</th><td><code>http://192.168.4.1/</code></td></tr>
+  <tr><th>板型</th><td>NodeMCU 1.0 (ESP-12E)，FQBN <code>esp8266:esp8266:nodemcuv2</code></td></tr>
+  <tr><th>串口</th><td><code>/dev/cu.usbserial-10</code> · CH340 · VID 1A86 PID 7523</td></tr>
+  <tr><th>本仓库</th><td><code>~/Desktop/esp8266-wifi-boat</code></td></tr>
+</table>
+<div class="danger">无人机是另一套东西（125mm / 8520）。船上的板、L298N、减速电机、电池、摄像头一律不拆去飞。</div>
+</section>
+
+<section id="buy">
+<h2>2. 已买件</h2>
+<table>
+  <tr><th>件</th><th>规格（按实物）</th><th>数量</th><th>状态</th></tr>
+  <tr><td>开发板</td><td>ESP8266 串口 wifi 模块 NodeMCU Lua V3 物联网开发板 CH340，USB-C</td><td>1</td><td>船上在用</td></tr>
+  <tr><td>数据线</td><td>USB-C，必须能传数据</td><td>1</td><td>烧录用</td></tr>
+  <tr><td>驱动</td><td>L298N 双路，板号 <b>HW-095</b>，两颗 220μF 35V</td><td>1</td><td>已接线</td></tr>
+  <tr><td>电机</td><td>直流减速电机（带齿轮箱）</td><td>2</td><td>左 OUT1/2，右 OUT3/4</td></tr>
+  <tr><td>电池</td><td>7.4V（2S）或 12V 均可。螺丝印 12V 不代表必须 12 伏</td><td>1</td><td>已供电；空过会蜂鸣</td></tr>
+  <tr><td>摄像头</td><td>Mobilechplus MW1350 USB2.0 130 万像素，圆板 YC-08-A3</td><td>1</td><td>不能接这块 ESP</td></tr>
+  <tr><td>船体 / 桨</td><td>未拍型号</td><td>?</td><td>未确认</td></tr>
+</table>
+<p>本机软件：Arduino IDE 2.3.10 arm64、arduino-cli 1.5.1、esp8266 核心 3.1.2。CH340 驱动不要再装。</p>
+<p>以后若还买：真要手机看画面再买 ESP32-CAM；烧了再买备用电机。不要为船再买空心杯、1S、飞控。</p>
+</section>
+
+<section id="use">
+<h2>3. 怎么开船</h2>
+<ol>
+  <li>电池正极 → L298N +12V，负极 → L298N GND。USB 先拔掉。</li>
+  <li>手机连热点 <b>wifi-boat</b> / <b>12345678</b>。</li>
+  <li>浏览器打开 <code>http://192.168.4.1/</code>（部分手机会自动弹出）。</li>
+  <li>先点「停止」，再点前进 / 左转 / 右转。特慢是脉冲爬行，慢 40%，快 90%。</li>
+</ol>
+<p>网页按钮对应接口 <code>/api/cmd?c=forward</code>（还有 backward、left、right、uturn、stop、crawl、slow、fast）。</p>
+</section>
+
+<section id="wire">
+<h2>4. 接线</h2>
+<figure>
+  <img src="img/01-L298N-HW095-绿框针脚.jpg" alt="L298N HW-095 绿框 6 针">
+  <figcaption>你拍的绿框：ENA / IN1 / IN2 / IN3 / IN4 / ENB。两端黑帽是 ENA、ENB 跳线，调速必须拔掉。</figcaption>
+</figure>
+<h3>绿框 6 针 → NodeMCU</h3>
+<table>
+  <tr><th>L298N</th><th>NodeMCU</th><th>GPIO</th><th>作用</th></tr>
+  <tr><td>ENA</td><td>D5</td><td>14</td><td>左速度 PWM。跳线帽已拔，不要再接到 +5V</td></tr>
+  <tr><td>IN1</td><td>D1</td><td>5</td><td>左方向</td></tr>
+  <tr><td>IN2</td><td>D2</td><td>4</td><td>左方向</td></tr>
+  <tr><td>IN3</td><td>D7</td><td>13</td><td>右方向</td></tr>
+  <tr><td>IN4</td><td>D8</td><td>15</td><td>右方向。不要用 D0，反转会停</td></tr>
+  <tr><td>ENB</td><td>D6</td><td>12</td><td>右速度 PWM。跳线帽已拔</td></tr>
+  <tr><td>GND</td><td>GND</td><td>—</td><td>必须共地</td></tr>
+</table>
+<h3>电源与电机</h3>
+<pre>电池正极 ──→ L298N +12V
+电池负极 ──→ L298N GND ──→ NodeMCU GND
+              L298N +5V ──→ NodeMCU VIN（或 5V/VU）  禁止接到 3V3
+
+OUT1 / OUT2 → 左电机
+OUT3 / OUT4 → 右电机</pre>
+<div class="danger">三个螺丝旁那颗没字的小跳线帽<b>戴着</b>（板载 5V 稳压）。ENA/ENB 两颗帽子<b>拔掉</b>。不要把电池 12V 接到 5V 螺丝。不要 USB 和电池同时给 ESP。</div>
+<p>桨转反了：只对调那一侧 OUT 的两根线。3V3、A0、D3、D4 都不要接到 L298N。</p>
+</section>
+
+<section id="speed">
+<h2>5. 油门</h2>
+<p>PWM 范围 0–1023，频率 1 kHz。连续低于约 75% 常常只叫不转（L298N 压降）。</p>
+<table>
+  <tr><th>档</th><th>网页</th><th>实际</th></tr>
+  <tr><td>特慢</td><td>crawl</td><td>每 400ms 给 20ms、85%（最低可转 75%+10%）的脉冲</td></tr>
+  <tr><td>慢</td><td>slow</td><td>连续 40%</td></tr>
+  <tr><td>快</td><td>fast</td><td>连续 90%</td></tr>
+  <tr><td>转弯</td><td>left / right</td><td>内侧 50%、外侧 80%（相对当前档）</td></tr>
+</table>
+</section>
+
+<section id="flash">
+<h2>6. 编译烧录</h2>
+<pre>cd ~/Desktop/esp8266-wifi-boat
+./scripts/compile.sh     # 只编译
+./scripts/upload.sh      # 编译并烧到当前 CH340 串口</pre>
+<p>接了 L298N 后 115200 烧录容易失败，脚本固定 <b>57600</b>。串口监视器在 IDE「查看」菜单，波特率 115200。</p>
+<h3>compile.sh</h3>
+<pre>#!/bin/zsh
+# 只编译，不烧录。用来确认代码能通过。
+set -euo pipefail
+
+ROOT=&quot;$(cd &quot;$(dirname &quot;$0&quot;)/..&quot; &amp;&amp; pwd)&quot;
+SKETCH=&quot;$ROOT/firmware/wifi_boat&quot;
+FQBN=&quot;esp8266:esp8266:nodemcuv2:baud=57600&quot;
+
+echo &quot;编译 sketch: $SKETCH&quot;
+echo &quot;板型 FQBN : $FQBN&quot;
+arduino-cli compile --fqbn &quot;$FQBN&quot; --warnings default &quot;$SKETCH&quot;
+echo &quot;编译成功&quot;
+</pre>
+<h3>upload.sh</h3>
+<pre>#!/bin/zsh
+# 编译并烧录到当前插着的 NodeMCU。
+set -euo pipefail
+
+ROOT=&quot;$(cd &quot;$(dirname &quot;$0&quot;)/..&quot; &amp;&amp; pwd)&quot;
+SKETCH=&quot;$ROOT/firmware/wifi_boat&quot;
+# 接了 L298N/电池后高速烧录容易失败，固定 57600
+FQBN=&quot;esp8266:esp8266:nodemcuv2:baud=57600&quot;
+
+# 自动找 CH340 串口。如果插了多块板，请改成明确的设备名。
+PORT=&quot;$(ls /dev/cu.usbserial* 2&gt;/dev/null | head -n 1 || true)&quot;
+if [[ -z &quot;${PORT}&quot; ]]; then
+  echo &quot;找不到 /dev/cu.usbserial* ，请检查 USB 线和 CH340 是否被识别。&quot;
+  echo &quot;排查：ls /dev/cu.*    以及拔掉再插一次数据线。&quot;
+  exit 1
+fi
+
+echo &quot;编译并烧录&quot;
+echo &quot;  sketch : $SKETCH&quot;
+echo &quot;  FQBN   : $FQBN&quot;
+echo &quot;  串口   : $PORT&quot;
+
+arduino-cli compile --fqbn &quot;$FQBN&quot; --warnings default &quot;$SKETCH&quot;
+arduino-cli upload --fqbn &quot;$FQBN&quot; --port &quot;$PORT&quot; &quot;$SKETCH&quot;
+
+echo &quot;烧录完成。板载蓝灯应开始闪烁。&quot;
+echo &quot;看串口输出：arduino-cli monitor -p $PORT -c baudrate=115200&quot;
+</pre>
+</section>
+
+<section id="cam">
+<h2>7. 摄像头（接不上这块 ESP）</h2>
+<p>外壳铭牌：<code>USB2.0 1.3Mega Pixel · Mobilechplus MW1350</code>。圆板丝印 <code>YC-08-A3</code>。这是 USB 免驱摄像头，ESP8266 没有 USB 主机。</p>
+<table>
+  <tr><th>线色</th><th>USB 脚</th></tr>
+  <tr><td>红</td><td>+5V</td></tr>
+  <tr><td>白</td><td>D−</td></tr>
+  <tr><td>绿</td><td>D+</td></tr>
+  <tr><td>黑</td><td>GND</td></tr>
+  <tr><td>黄 / 蓝</td><td>驻极体麦，不是给 ESP ADC 的</td></tr>
+</table>
+<div class="danger">不要把 D+/D− 焊到 GPIO。以后要手机看画面另买 ESP32-CAM。</div>
+<div class="grid">
+  <figure><img src="img/02-摄像头外壳-MW1350.jpg" alt="MW1350 外壳"><figcaption>外壳铭牌</figcaption></figure>
+  <figure><img src="img/06-镜头丝印-YC-08-A3.jpg" alt="YC-08-A3"><figcaption>圆板丝印 YC-08-A3</figcaption></figure>
+  <figure><img src="img/04-摄像头芯片与麦.jpg" alt="芯片与麦"><figcaption>主控 + 驻极体麦</figcaption></figure>
+  <figure><img src="img/05-摄像头线束.jpg" alt="线束"><figcaption>红白绿黑 + 黄蓝麦线</figcaption></figure>
+</div>
+</section>
+
+<section id="code">
+<h2>8. 程序（仓库当前文件）</h2>
+<p>入口 <code>firmware/wifi_boat/</code>。改油门改 <code>config.h</code>，改接线改同一文件里的 PIN_*。</p>
+<h3>config.h</h3>
+<pre>/*
+ * config.h
+ * 全项目配置集中放这里。
+ *
+ * 当前阶段：第三阶段
+ *   已定义 L298N 引脚和 Motor 类，网页指令会改 GPIO。
+ *   还没有接线，电机不会转。第四阶段才接 L298N。
+ */
+
+#ifndef WIFI_BOAT_CONFIG_H
+#define WIFI_BOAT_CONFIG_H
+
+#define SERIAL_BAUD 115200
+
+#define WIFI_AP_SSID     &quot;wifi-boat&quot;
+#define WIFI_AP_PASSWORD &quot;12345678&quot;
+#define WIFI_AP_CHANNEL  1
+#define WIFI_AP_MAX_CONN 4
+#define WEB_SERVER_PORT  80
+
+/*
+ * L298N 接线表（第四阶段才动手，现在只写进程序）
+ *
+ * NodeMCU 丝印    GPIO     L298N
+ * D5              14       ENA   左电机速度（PWM）
+ * D1               5       IN1   左电机方向
+ * D2               4       IN2   左电机方向
+ * D6              12       ENB   右电机速度（PWM）
+ * D7              13       IN3   右电机方向
+ * D8              15       IN4   右电机方向
+ *
+ * 不用这些脚的原因：
+ *   D3/GPIO0  烧录按键，启动模式相关
+ *   D4/GPIO2  板载 LED，启动模式相关
+ *   D0/GPIO16 NodeMCU 上经常拉不出高电平，反转会变成停止
+ */
+
+#define PIN_ENA 14
+#define PIN_IN1 5
+#define PIN_IN2 4
+#define PIN_ENB 12
+#define PIN_IN3 13
+#define PIN_IN4 15
+
+// 慢≤40、快=90。特慢用脉冲：每次用「刚能转的最低油门+10%」顶一下。
+#define MOTOR_PWM_MAX        1023
+#define MOTOR_PWM_FREQ_HZ    1000
+#define MOTOR_SPEED_SLOW     40
+#define MOTOR_SPEED_FAST     90
+#define MOTOR_SPEED_DEFAULT  MOTOR_SPEED_SLOW
+
+// L298N+减速电机大约 75% 才转得动。脉冲里用 75+10=85%。
+#define MOTOR_MIN_SPIN_PCT     75
+#define MOTOR_CRAWL_PULSE_PCT  (MOTOR_MIN_SPIN_PCT + 10)
+#define MOTOR_CRAWL_PERIOD_MS  400
+#define MOTOR_CRAWL_ON_MS      20
+
+#define MOTOR_TURN_INNER     50
+#define MOTOR_TURN_OUTER     80
+
+#endif
+</pre>
+<h3>wifi_boat.ino</h3>
+<pre>/*
+ * wifi_boat.ino
+ * ESP8266 双电机 Wi-Fi 遥控船 · 主程序入口
+ *
+ * 当前阶段：第三阶段
+ *   网页按钮会调用 Motor，GPIO 按 L298N 定义动作。
+ *   还没有接线，电机不会转。不要接 L298N。
+ *
+ * 手机：连 wifi-boat / 12345678 → http://192.168.4.1/
+ * 电脑串口：Arduino IDE 菜单「查看」→「串口监视器」，115200
+ */
+
+#include &lt;Arduino.h&gt;
+#include &quot;config.h&quot;
+#include &quot;src/motor/Motor.h&quot;
+#include &quot;src/web/WebControl.h&quot;
+
+Motor motors;
+WebControl web;
+unsigned long lastBlinkMs = 0;
+bool ledOn = false;
+
+void setup() {
+  Serial.begin(SERIAL_BAUD);
+  delay(200);
+
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, HIGH);
+
+  motors.begin();
+  web.begin(&amp;motors);
+}
+
+void loop() {
+  web.loop();
+  motors.loop();
+
+  const unsigned long now = millis();
+  if (now - lastBlinkMs &gt;= 500) {
+    lastBlinkMs = now;
+    ledOn = !ledOn;
+    digitalWrite(LED_BUILTIN, ledOn ? LOW : HIGH);
+  }
+}
+</pre>
+<h3>src/motor/Motor.h</h3>
+<pre>/*
+ * 特慢：脉冲（最低可转油门+10%）。慢 40%。快 90%。
+ */
+
+#ifndef WIFI_BOAT_MOTOR_H
+#define WIFI_BOAT_MOTOR_H
+
+#include &lt;Arduino.h&gt;
+#include &quot;../../config.h&quot;
+
+class Motor {
+ public:
+  void begin();
+  void loop();
+  void setSpeed(int speed);
+  void forward();
+  void backward();
+  void left();
+  void right();
+  void uturn();
+  void stop();
+  void apply(const String&amp; cmd);
+
+ private:
+  int speed_ = MOTOR_SPEED_DEFAULT;
+  bool crawl_ = false;
+  String lastMove_ = &quot;stop&quot;;
+  int leftDir_ = 0;
+  int rightDir_ = 0;
+  int leftPct_ = 0;
+  int rightPct_ = 0;
+
+  void setMix(int leftDir, int leftPct, int rightDir, int rightPct);
+  void refresh();
+  void driveLeft(int dir, int pwm);
+  void driveRight(int dir, int pwm);
+  int hwPwm(int pct) const;
+  void writeEnable(uint8_t pin, int hw);
+  int turnInner() const;
+  int turnOuter() const;
+};
+
+#endif
+</pre>
+<h3>src/motor/Motor.cpp</h3>
+<pre>#include &quot;Motor.h&quot;
+
+void Motor::begin() {
+  pinMode(PIN_IN1, OUTPUT);
+  pinMode(PIN_IN2, OUTPUT);
+  pinMode(PIN_IN3, OUTPUT);
+  pinMode(PIN_IN4, OUTPUT);
+  pinMode(PIN_ENA, OUTPUT);
+  pinMode(PIN_ENB, OUTPUT);
+
+  analogWriteRange(MOTOR_PWM_MAX);
+  analogWriteFreq(MOTOR_PWM_FREQ_HZ);
+
+  speed_ = MOTOR_SPEED_DEFAULT;
+  crawl_ = false;
+  stop();
+  Serial.println(F(&quot;Motor: 特慢=脉冲(最低+10%)  慢40  快90&quot;));
+}
+
+void Motor::loop() {
+  if (crawl_ &amp;&amp; lastMove_ != &quot;stop&quot;) {
+    refresh();
+  }
+}
+
+void Motor::setSpeed(int speed) {
+  if (speed &lt; 0) speed = 0;
+  if (speed &gt; 100) speed = 100;
+  speed_ = speed;
+  crawl_ = false;
+  Serial.print(F(&quot;Motor: 档 &quot;));
+  Serial.println(speed_);
+}
+
+int Motor::hwPwm(int pct) const {
+  if (pct &lt;= 0) return 0;
+  if (pct &gt;= 100) return MOTOR_PWM_MAX;
+  return pct * MOTOR_PWM_MAX / 100;
+}
+
+void Motor::writeEnable(uint8_t pin, int hw) {
+  if (hw &lt;= 0) {
+    analogWrite(pin, 0);
+    digitalWrite(pin, LOW);
+  } else if (hw &gt;= MOTOR_PWM_MAX) {
+    analogWrite(pin, 0);
+    digitalWrite(pin, HIGH);
+  } else {
+    analogWrite(pin, hw);
+  }
+}
+
+void Motor::driveLeft(int dir, int pwm) {
+  const int hw = hwPwm(pwm);
+  if (dir &gt; 0) {
+    digitalWrite(PIN_IN1, HIGH);
+    digitalWrite(PIN_IN2, LOW);
+    writeEnable(PIN_ENA, hw);
+  } else if (dir &lt; 0) {
+    digitalWrite(PIN_IN1, LOW);
+    digitalWrite(PIN_IN2, HIGH);
+    writeEnable(PIN_ENA, hw);
+  } else {
+    digitalWrite(PIN_IN1, LOW);
+    digitalWrite(PIN_IN2, LOW);
+    writeEnable(PIN_ENA, 0);
+  }
+}
+
+void Motor::driveRight(int dir, int pwm) {
+  const int hw = hwPwm(pwm);
+  if (dir &gt; 0) {
+    digitalWrite(PIN_IN3, HIGH);
+    digitalWrite(PIN_IN4, LOW);
+    writeEnable(PIN_ENB, hw);
+  } else if (dir &lt; 0) {
+    digitalWrite(PIN_IN3, LOW);
+    digitalWrite(PIN_IN4, HIGH);
+    writeEnable(PIN_ENB, hw);
+  } else {
+    digitalWrite(PIN_IN3, LOW);
+    digitalWrite(PIN_IN4, LOW);
+    writeEnable(PIN_ENB, 0);
+  }
+}
+
+void Motor::setMix(int leftDir, int leftPct, int rightDir, int rightPct) {
+  leftDir_ = leftDir;
+  rightDir_ = rightDir;
+  leftPct_ = leftPct;
+  rightPct_ = rightPct;
+  refresh();
+}
+
+void Motor::refresh() {
+  if (lastMove_ == &quot;stop&quot;) {
+    driveLeft(0, 0);
+    driveRight(0, 0);
+    return;
+  }
+
+  if (crawl_) {
+    const bool pulseOn = (millis() % MOTOR_CRAWL_PERIOD_MS) &lt; MOTOR_CRAWL_ON_MS;
+    if (!pulseOn) {
+      writeEnable(PIN_ENA, 0);
+      writeEnable(PIN_ENB, 0);
+      return;
+    }
+    // 脉冲内：最低可转 +10%。转弯外侧略高、内侧略低。
+    int lp = MOTOR_CRAWL_PULSE_PCT;
+    int rp = MOTOR_CRAWL_PULSE_PCT;
+    if (leftPct_ &lt; rightPct_) lp = MOTOR_MIN_SPIN_PCT;
+    if (rightPct_ &lt; leftPct_) rp = MOTOR_MIN_SPIN_PCT;
+    driveLeft(leftDir_, lp);
+    driveRight(rightDir_, rp);
+    return;
+  }
+
+  driveLeft(leftDir_, leftPct_);
+  driveRight(rightDir_, rightPct_);
+}
+
+int Motor::turnInner() const {
+  return speed_ * MOTOR_TURN_INNER / 100;
+}
+
+int Motor::turnOuter() const {
+  return speed_ * MOTOR_TURN_OUTER / 100;
+}
+
+void Motor::forward() {
+  setMix(1, speed_, 1, speed_);
+}
+
+void Motor::backward() {
+  setMix(-1, speed_, -1, speed_);
+}
+
+void Motor::left() {
+  setMix(1, turnInner(), 1, turnOuter());
+}
+
+void Motor::right() {
+  setMix(1, turnOuter(), 1, turnInner());
+}
+
+void Motor::uturn() {
+  setMix(-1, turnInner(), 1, turnOuter());
+}
+
+void Motor::stop() {
+  lastMove_ = &quot;stop&quot;;
+  leftDir_ = 0;
+  rightDir_ = 0;
+  leftPct_ = 0;
+  rightPct_ = 0;
+  driveLeft(0, 0);
+  driveRight(0, 0);
+}
+
+void Motor::apply(const String&amp; cmd) {
+  if (cmd == &quot;crawl&quot;) {
+    crawl_ = true;
+    speed_ = MOTOR_CRAWL_PULSE_PCT;
+    Serial.println(F(&quot;Motor: 特慢 脉冲 最低+10%&quot;));
+    if (lastMove_ != &quot;stop&quot;) apply(lastMove_);
+    return;
+  }
+  if (cmd == &quot;slow&quot;) {
+    setSpeed(MOTOR_SPEED_SLOW);
+    if (lastMove_ != &quot;stop&quot;) apply(lastMove_);
+    return;
+  }
+  if (cmd == &quot;fast&quot;) {
+    setSpeed(MOTOR_SPEED_FAST);
+    if (lastMove_ != &quot;stop&quot;) apply(lastMove_);
+    return;
+  }
+
+  if (cmd == &quot;forward&quot;) {
+    lastMove_ = cmd;
+    forward();
+  } else if (cmd == &quot;backward&quot;) {
+    lastMove_ = cmd;
+    backward();
+  } else if (cmd == &quot;left&quot;) {
+    lastMove_ = cmd;
+    left();
+  } else if (cmd == &quot;right&quot;) {
+    lastMove_ = cmd;
+    right();
+  } else if (cmd == &quot;uturn&quot;) {
+    lastMove_ = cmd;
+    uturn();
+  } else {
+    stop();
+  }
+
+  Serial.print(F(&quot;  L=&quot;));
+  Serial.print(leftPct_);
+  Serial.print(F(&quot; R=&quot;));
+  Serial.print(rightPct_);
+  Serial.print(F(&quot; crawl=&quot;));
+  Serial.println(crawl_ ? 1 : 0);
+}
+</pre>
+<h3>src/web/WebControl.h</h3>
+<pre>/*
+ * WebControl.h
+ * 热点 + 网页控制台。
+ * 第三阶段起：按钮会调用 Motor，但尚未接线。
+ */
+
+#ifndef WIFI_BOAT_WEB_CONTROL_H
+#define WIFI_BOAT_WEB_CONTROL_H
+
+#include &lt;Arduino.h&gt;
+#include &lt;ESP8266WiFi.h&gt;
+#include &lt;ESP8266WebServer.h&gt;
+#include &lt;DNSServer.h&gt;
+#include &quot;../../config.h&quot;
+#include &quot;../motor/Motor.h&quot;
+
+class WebControl {
+ public:
+  void begin(Motor* motors);
+  void loop();
+
+ private:
+  ESP8266WebServer server_;
+  DNSServer dns_;
+  IPAddress apIp_;
+  Motor* motors_ = nullptr;
+
+  void handleRoot();
+  void handleCommand();
+  void handleNotFound();
+  void printCommand(const String&amp; cmd);
+};
+
+#endif
+</pre>
+<h3>src/web/WebControl.cpp</h3>
+<pre>#include &quot;WebControl.h&quot;
+#include &quot;page.html.h&quot;
+
+void WebControl::begin(Motor* motors) {
+  motors_ = motors;
+  apIp_ = IPAddress(192, 168, 4, 1);
+
+  WiFi.persistent(false);
+  WiFi.setSleepMode(WIFI_NONE_SLEEP);
+  WiFi.mode(WIFI_AP);
+  WiFi.softAPConfig(apIp_, apIp_, IPAddress(255, 255, 255, 0));
+  const bool ok = WiFi.softAP(WIFI_AP_SSID, WIFI_AP_PASSWORD, WIFI_AP_CHANNEL, false, WIFI_AP_MAX_CONN);
+
+  Serial.println();
+  Serial.println(F(&quot;================================&quot;));
+  Serial.println(F(&quot;wifi_boat  第三阶段  Motor + 网页&quot;));
+  Serial.println(F(&quot;GPIO 会动作，但还没接 L298N，桨不会转&quot;));
+  Serial.print(F(&quot;热点名称: &quot;));
+  Serial.println(WIFI_AP_SSID);
+  Serial.print(F(&quot;热点密码: &quot;));
+  Serial.println(WIFI_AP_PASSWORD);
+  Serial.print(F(&quot;控制页:   http://&quot;));
+  Serial.println(apIp_);
+  Serial.print(F(&quot;softAP:   &quot;));
+  Serial.println(ok ? F(&quot;OK&quot;) : F(&quot;失败&quot;));
+  Serial.println(F(&quot;================================&quot;));
+
+  // 把所有域名解析到 192.168.4.1，手机连上后容易弹出登录页。
+  dns_.start(53, &quot;*&quot;, apIp_);
+
+  server_.on(&quot;/&quot;, HTTP_GET, [this]() { handleRoot(); });
+  server_.on(&quot;/api/cmd&quot;, HTTP_GET, [this]() { handleCommand(); });
+  server_.on(&quot;/api/ping&quot;, HTTP_GET, [this]() {
+    server_.send(200, &quot;text/plain&quot;, &quot;pong&quot;);
+  });
+  // iOS / Android 探测「需要登录的热点」时会访问这些地址
+  server_.on(&quot;/hotspot-detect.html&quot;, HTTP_GET, [this]() { handleRoot(); });
+  server_.on(&quot;/generate_204&quot;, HTTP_GET, [this]() { handleRoot(); });
+  server_.on(&quot;/ncsi.txt&quot;, HTTP_GET, [this]() { handleRoot(); });
+  server_.on(&quot;/canonical.html&quot;, HTTP_GET, [this]() { handleRoot(); });
+  server_.onNotFound([this]() { handleNotFound(); });
+
+  server_.begin(WEB_SERVER_PORT);
+}
+
+void WebControl::loop() {
+  dns_.processNextRequest();
+  server_.handleClient();
+  yield();
+}
+
+void WebControl::handleRoot() {
+  server_.send_P(200, &quot;text/html; charset=utf-8&quot;, CONTROL_PAGE);
+}
+
+void WebControl::handleCommand() {
+  String cmd = server_.arg(&quot;c&quot;);
+  cmd.toLowerCase();
+  printCommand(cmd);
+  if (motors_) {
+    motors_-&gt;apply(cmd);
+  }
+
+  String text = cmd;
+  if (cmd == &quot;forward&quot;) text = &quot;前进&quot;;
+  else if (cmd == &quot;backward&quot;) text = &quot;后退&quot;;
+  else if (cmd == &quot;left&quot;) text = &quot;左转 左50 右80&quot;;
+  else if (cmd == &quot;right&quot;) text = &quot;右转 左80 右50&quot;;
+  else if (cmd == &quot;uturn&quot;) text = &quot;掉头 内50 外80&quot;;
+  else if (cmd == &quot;stop&quot;) text = &quot;停止&quot;;
+  else if (cmd == &quot;crawl&quot;) text = &quot;特慢 脉冲(最低+10%)&quot;;
+  else if (cmd == &quot;slow&quot;) text = &quot;慢 ≤40%&quot;;
+  else if (cmd == &quot;fast&quot;) text = &quot;快 90%&quot;;
+  else text = &quot;未知指令: &quot; + cmd;
+
+  String json = &quot;{\&quot;ok\&quot;:true,\&quot;cmd\&quot;:\&quot;&quot; + cmd + &quot;\&quot;,\&quot;text\&quot;:\&quot;&quot; + text + &quot;\&quot;}&quot;;
+  server_.send(200, &quot;application/json; charset=utf-8&quot;, json);
+}
+
+void WebControl::handleNotFound() {
+  // 没匹配到的地址也给控制页，方便手机强制门户弹出。
+  handleRoot();
+}
+
+void WebControl::printCommand(const String&amp; cmd) {
+  Serial.print(F(&quot;[CMD] &quot;));
+  if (cmd == &quot;forward&quot;) Serial.println(F(&quot;前进  forward&quot;));
+  else if (cmd == &quot;backward&quot;) Serial.println(F(&quot;后退  backward&quot;));
+  else if (cmd == &quot;left&quot;) Serial.println(F(&quot;左转  left&quot;));
+  else if (cmd == &quot;right&quot;) Serial.println(F(&quot;右转  right&quot;));
+  else if (cmd == &quot;uturn&quot;) Serial.println(F(&quot;掉头  uturn&quot;));
+  else if (cmd == &quot;stop&quot;) Serial.println(F(&quot;停止  stop&quot;));
+  else if (cmd == &quot;crawl&quot;) Serial.println(F(&quot;速度 特慢 脉冲&quot;));
+  else if (cmd == &quot;slow&quot;) Serial.println(F(&quot;速度 慢 40%&quot;));
+  else if (cmd == &quot;fast&quot;) Serial.println(F(&quot;速度 快 90%&quot;));
+  else {
+    Serial.print(F(&quot;未知  &quot;));
+    Serial.println(cmd);
+  }
+}
+</pre>
+<h3>src/web/page.html.h</h3>
+<pre>/*
+ * 控制页 HTML，放 PROGMEM 节省 RAM。
+ * 手机浏览器打开后是大按钮，点一下发 /api/cmd?c=xxx。
+ */
+#ifndef WIFI_BOAT_PAGE_HTML_H
+#define WIFI_BOAT_PAGE_HTML_H
+
+#include &lt;Arduino.h&gt;
+
+static const char CONTROL_PAGE[] PROGMEM = R&quot;HTML(
+&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;zh-CN&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;utf-8&quot;&gt;
+&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width,initial-scale=1,viewport-fit=cover&quot;&gt;
+&lt;meta name=&quot;apple-mobile-web-app-capable&quot; content=&quot;yes&quot;&gt;
+&lt;title&gt;遥控船&lt;/title&gt;
+&lt;style&gt;
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0; min-height: 100vh; font-family: -apple-system, sans-serif;
+    background: #0b1220; color: #e8eefc; display: flex; flex-direction: column;
+    align-items: center; padding: 20px 16px 32px;
+  }
+  h1 { font-size: 20px; font-weight: 650; margin: 8px 0 4px; }
+  .sub { color: #8aa0c4; font-size: 13px; margin-bottom: 18px; }
+  .grid {
+    width: min(360px, 100%);
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+  }
+  button {
+    border: 0; border-radius: 16px; padding: 18px 8px;
+    font-size: 18px; font-weight: 650; color: #fff;
+    background: #24344f; min-height: 72px;
+  }
+  button:active { transform: scale(0.97); filter: brightness(1.15); }
+  .fwd { grid-column: 2; background: #1f6feb; }
+  .left { grid-column: 1; }
+  .right { grid-column: 3; }
+  .back { grid-column: 2; }
+  .uturn { grid-column: 1 / span 3; background: #3d4f6f; }
+  .stop { grid-column: 1 / span 3; background: #c62828; min-height: 84px; font-size: 22px; }
+  .spd { min-height: 52px; font-size: 15px; background: #1a283c; }
+  .note { width: min(360px, 100%); color: #8aa0c4; font-size: 12px; line-height: 1.45; margin: 14px 0 0; }
+  #status {
+    margin-top: 16px; min-height: 24px; color: #9ad07a; font-size: 15px;
+  }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;Wi-Fi 遥控船&lt;/h1&gt;
+  &lt;div class=&quot;sub&quot;&gt;特慢=脉冲爬行 · 慢40% · 快90%&lt;/div&gt;
+  &lt;div class=&quot;grid&quot;&gt;
+    &lt;button class=&quot;fwd&quot; onclick=&quot;go(&#x27;forward&#x27;)&quot;&gt;前进&lt;/button&gt;
+    &lt;button class=&quot;left&quot; onclick=&quot;go(&#x27;left&#x27;)&quot;&gt;左转&lt;/button&gt;
+    &lt;button class=&quot;right&quot; onclick=&quot;go(&#x27;right&#x27;)&quot;&gt;右转&lt;/button&gt;
+    &lt;button class=&quot;back&quot; onclick=&quot;go(&#x27;backward&#x27;)&quot;&gt;后退&lt;/button&gt;
+    &lt;button class=&quot;uturn&quot; onclick=&quot;go(&#x27;uturn&#x27;)&quot;&gt;掉头&lt;/button&gt;
+    &lt;button class=&quot;stop&quot; onclick=&quot;go(&#x27;stop&#x27;)&quot;&gt;停止&lt;/button&gt;
+    &lt;button class=&quot;spd&quot; onclick=&quot;go(&#x27;crawl&#x27;)&quot;&gt;特慢&lt;/button&gt;
+    &lt;button class=&quot;spd&quot; onclick=&quot;go(&#x27;slow&#x27;)&quot;&gt;慢&lt;/button&gt;
+    &lt;button class=&quot;spd&quot; onclick=&quot;go(&#x27;fast&#x27;)&quot;&gt;快&lt;/button&gt;
+  &lt;/div&gt;
+  &lt;div class=&quot;note&quot;&gt;特慢：每 0.4 秒给 20ms「刚能转+10%」的脉冲，桨会一顿一顿往前。连续 10% 油门转不动。慢 40%，快 90%。&lt;/div&gt;
+  &lt;div id=&quot;status&quot;&gt;已连接 · 慢&lt;/div&gt;
+&lt;script&gt;
+async function go(cmd) {
+  const el = document.getElementById(&#x27;status&#x27;);
+  el.textContent = &#x27;发送中…&#x27;;
+  try {
+    const r = await fetch(&#x27;/api/cmd?c=&#x27; + cmd);
+    const j = await r.json();
+    el.textContent = j.text || cmd;
+  } catch (e) {
+    el.textContent = &#x27;发送失败，确认还连着 wifi-boat&#x27;;
+  }
+}
+setInterval(async () =&gt; {
+  try { await fetch(&#x27;/api/ping&#x27;); }
+  catch (e) {
+    document.getElementById(&#x27;status&#x27;).textContent = &#x27;已断开，请重连 wifi-boat&#x27;;
+  }
+}, 2500);
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+)HTML&quot;;
+
+#endif
+</pre>
+</section>
+
+<section id="pits">
+<h2>9. 踩过的坑</h2>
+<table>
+  <tr><th>现象</th><th>原因 / 处理</th></tr>
+  <tr><td>反转变成停止</td><td>IN4 接到了 D0。改接到 D8（GPIO15）</td></tr>
+  <tr><td>烧录 verify fail / Invalid head</td><td>接电机后 115200 不稳。改 57600</td></tr>
+  <tr><td>慢档几乎是满速</td><td>不要把 40% 映射到 780–1023。百分比按 0–1023 线性</td></tr>
+  <tr><td>10% 连续只蜂鸣</td><td>低于约 75% 转不动。特慢改成 85% 短脉冲</td></tr>
+  <tr><td>点按键蜂鸣不转</td><td>电池空了</td></tr>
+  <tr><td>Wi-Fi 一调电机就掉</td><td>用 WIFI_NONE_SLEEP，PWM 1 kHz，不要乱改 analogWriteRange(100)</td></tr>
+  <tr><td>IDE 找不到串口监视器</td><td>在「查看」，不在「工具」</td></tr>
+  <tr><td>摄像头没画面</td><td>MW1350 是 USB 头，这块板带不了</td></tr>
+</table>
+</section>
+</main>
+</div>
+</body>
+</html>

@@ -27,3 +27,9 @@ build/
 *.log
 *.tmp
 .cache/
+
+# 体积很大的本机安装包（清单在 docs/下载清单.md）
+downloads/*.dmg
+downloads/*.zip
+downloads/*.tar.gz
+downloads/*.gz
