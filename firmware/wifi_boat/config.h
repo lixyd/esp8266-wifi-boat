@@ -42,13 +42,18 @@
 #define PIN_IN3 13
 #define PIN_IN4 15
 
-// 油门百分比上限：特慢 ≤10，慢 ≤40，快 ≥80。
+// 慢≤40、快=90。特慢用脉冲：每次用「刚能转的最低油门+10%」顶一下。
 #define MOTOR_PWM_MAX        1023
 #define MOTOR_PWM_FREQ_HZ    1000
-#define MOTOR_SPEED_CRAWL    10
 #define MOTOR_SPEED_SLOW     40
 #define MOTOR_SPEED_FAST     90
 #define MOTOR_SPEED_DEFAULT  MOTOR_SPEED_SLOW
+
+// L298N+减速电机大约 75% 才转得动。脉冲里用 75+10=85%。
+#define MOTOR_MIN_SPIN_PCT     75
+#define MOTOR_CRAWL_PULSE_PCT  (MOTOR_MIN_SPIN_PCT + 10)
+#define MOTOR_CRAWL_PERIOD_MS  400
+#define MOTOR_CRAWL_ON_MS      20
 
 #define MOTOR_TURN_INNER     50
 #define MOTOR_TURN_OUTER     80

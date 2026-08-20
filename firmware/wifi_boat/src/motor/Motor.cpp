@@ -12,16 +12,22 @@ void Motor::begin() {
   analogWriteFreq(MOTOR_PWM_FREQ_HZ);
 
   speed_ = MOTOR_SPEED_DEFAULT;
+  crawl_ = false;
   stop();
-  Serial.println(F("Motor: 特慢10  慢40  快90"));
+  Serial.println(F("Motor: 特慢=脉冲(最低+10%)  慢40  快90"));
 }
 
-void Motor::loop() {}
+void Motor::loop() {
+  if (crawl_ && lastMove_ != "stop") {
+    refresh();
+  }
+}
 
 void Motor::setSpeed(int speed) {
   if (speed < 0) speed = 0;
   if (speed > 100) speed = 100;
   speed_ = speed;
+  crawl_ = false;
   Serial.print(F("Motor: 档 "));
   Serial.println(speed_);
 }
@@ -83,6 +89,33 @@ void Motor::setMix(int leftDir, int leftPct, int rightDir, int rightPct) {
   rightDir_ = rightDir;
   leftPct_ = leftPct;
   rightPct_ = rightPct;
+  refresh();
+}
+
+void Motor::refresh() {
+  if (lastMove_ == "stop") {
+    driveLeft(0, 0);
+    driveRight(0, 0);
+    return;
+  }
+
+  if (crawl_) {
+    const bool pulseOn = (millis() % MOTOR_CRAWL_PERIOD_MS) < MOTOR_CRAWL_ON_MS;
+    if (!pulseOn) {
+      writeEnable(PIN_ENA, 0);
+      writeEnable(PIN_ENB, 0);
+      return;
+    }
+    // 脉冲内：最低可转 +10%。转弯外侧略高、内侧略低。
+    int lp = MOTOR_CRAWL_PULSE_PCT;
+    int rp = MOTOR_CRAWL_PULSE_PCT;
+    if (leftPct_ < rightPct_) lp = MOTOR_MIN_SPIN_PCT;
+    if (rightPct_ < leftPct_) rp = MOTOR_MIN_SPIN_PCT;
+    driveLeft(leftDir_, lp);
+    driveRight(rightDir_, rp);
+    return;
+  }
+
   driveLeft(leftDir_, leftPct_);
   driveRight(rightDir_, rightPct_);
 }
@@ -127,7 +160,9 @@ void Motor::stop() {
 
 void Motor::apply(const String& cmd) {
   if (cmd == "crawl") {
-    setSpeed(MOTOR_SPEED_CRAWL);
+    crawl_ = true;
+    speed_ = MOTOR_CRAWL_PULSE_PCT;
+    Serial.println(F("Motor: 特慢 脉冲 最低+10%"));
     if (lastMove_ != "stop") apply(lastMove_);
     return;
   }
@@ -163,7 +198,8 @@ void Motor::apply(const String& cmd) {
 
   Serial.print(F("  L="));
   Serial.print(leftPct_);
-  Serial.print(F("% R="));
+  Serial.print(F(" R="));
   Serial.print(rightPct_);
-  Serial.println('%');
+  Serial.print(F(" crawl="));
+  Serial.println(crawl_ ? 1 : 0);
 }
